@@ -17,15 +17,15 @@ const Y_STEP = 80;
 const PLAYER_X_START = 200;
 const PLAYER_Y_START = 400;
 const PLAYER_HEIGHT = 60;
-const PLAYER_WIDTH = 80;
 
 let win = 1;
 let lose = 0;
 
-let Enemy = function (x, y, speed) {
+let Enemy = function (x, y, speed, player) {
   this.x = x;
   this.y = y;
   this.speed = speed;
+  this.player = player;
   this.sprite = "images/enemy-bug.png";
 };
 
@@ -40,13 +40,13 @@ Enemy.prototype.update = function (dt) {
 
 Enemy.prototype.checkCollisions = function () {
   if (
-    player.x < this.x + PLAYER_WIDTH &&
-    player.x + PLAYER_WIDTH > this.x &&
-    player.y < this.y + PLAYER_HEIGHT &&
-    PLAYER_HEIGHT + player.y > this.y
+    this.player.x < this.x + this.player.width &&
+    this.player.x + this.player.width > this.x &&
+    this.player.y < this.y + this.player.height &&
+    this.player.height + this.player.y > this.y
   ) {
-    player.x = PLAYER_X_START;
-    player.y = PLAYER_Y_START;
+    this.player.x = PLAYER_X_START;
+    this.player.y = PLAYER_Y_START;
     lose++;
   }
 };
@@ -55,9 +55,11 @@ Enemy.prototype.render = function () {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-const Player = function (x, y) {
+const Player = function (x, y, width, height) {
   this.x = x;
   this.y = y;
+  this.width = width;
+  this.height = height;
   this.player = "images/char-boy.png";
 };
 
@@ -83,9 +85,9 @@ Player.prototype.handleInput = function (keyPress) {
       if (this.y !== START_POINT) {
         this.y -= Y_STEP;
       } else {
-        player.x = PLAYER_X_START;
-        player.y = PLAYER_Y_START;
-        alert(`Your score! 🏆 Win: ${win++} 😕 Lose: ${lose}`);
+        this.x = PLAYER_X_START;
+        this.y = PLAYER_Y_START;
+        alert(`Your score! 🏆 Win: ${win++}  Lose: ${lose}`);
       }
       break;
     case "down":
@@ -93,15 +95,24 @@ Player.prototype.handleInput = function (keyPress) {
         this.y += Y_STEP;
       }
       break;
+    default:
+      this.x = PLAYER_X_START;
+      this.y = PLAYER_Y_START;
   }
 };
 
-const player = new Player(PLAYER_X_START, PLAYER_Y_START);
+const player = new Player(
+  PLAYER_X_START,
+  PLAYER_Y_START,
+  Y_STEP,
+  PLAYER_HEIGHT
+);
+
 const allEnemies = [];
 const enemyLocation = [ENEMY_LOCATION_1, ENEMY_LOCATION_2, ENEMY_LOCATION_3];
 
 enemyLocation.forEach(function (y) {
-  let enemy = new Enemy(0, y, ENEMY_SPEED_MIN);
+  let enemy = new Enemy(0, y, ENEMY_SPEED_MIN, player);
   allEnemies.push(enemy);
 });
 
